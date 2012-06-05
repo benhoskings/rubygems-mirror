@@ -39,18 +39,23 @@ class Gem::Mirror::Fetcher
     # TODO rescue http errors and reraise cleanly
   end
 
-  # Efficiently writes an http response object to a particular path. If there
-  # is an error, it will remove the target file.
+  # Efficiently and atomically writes an http response object to a particular path.
   def write_file(resp, path)
     FileUtils.mkdir_p File.dirname(path)
-    File.open(path, 'wb') do |output|
+    # Download to a temporary file...
+    File.open(tmp_path_for(path), 'wb') do |output|
       resp.read_body { |chunk| output << chunk }
     end
+    # ... and atomically move it into place when it succeeds.
+    FileUtils.mv tmp_path_for(path), path
     true
-  ensure
-    # cleanup incomplete files, rescue perm errors etc, they're being
-    # raised already.
-    File.delete(path) rescue nil if $!
+  rescue StandardError
+    # Delete (likely incomplete) temporary files on error.
+    File.delete(tmp_path_for(path))
+  end
+
+  def tmp_path_for path
+    File.join File.dirname(path), ".#{File.basename(path)}.tmp"
   end
 
 end
