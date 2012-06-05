@@ -7,6 +7,7 @@ class Gem::Mirror::Fetcher
 
   def initialize
     @http = Net::HTTP::Persistent.new(self.class.name, :ENV)
+    $stderr.sync = true
   end
 
   # Fetch a source path under the base uri, and put it in the same or given
@@ -27,9 +28,12 @@ class Gem::Mirror::Fetcher
   def handle_response(resp, path)
     case resp.code.to_i
     when 304
+      print '~'
     when 302
+      print '>'
       fetch resp['location'], path
     when 200
+      print '.'
       write_file(resp, path)
     when 403, 404
       warn "#{resp.code} on #{File.basename(path)}"
