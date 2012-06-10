@@ -56,7 +56,11 @@ class Gem::Mirror::Fetcher
   rescue StandardError => ex
     # Delete (likely incomplete) temporary files on error.
     warn "#{ex.class}: #{ex.message} - attempting to remove #{tmp_path_for(path)}."
-    File.delete(tmp_path_for(path))
+    begin
+      File.delete(tmp_path_for(path))
+    rescue StandardError => ex
+      warn "#{ex.class}: #{ex.message} while attempting to remove #{tmp_path_for(path)}."
+    end
   end
 
   def tmp_path_for path
