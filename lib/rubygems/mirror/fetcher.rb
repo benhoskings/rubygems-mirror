@@ -53,8 +53,9 @@ class Gem::Mirror::Fetcher
     # ... and atomically move it into place when it succeeds.
     FileUtils.mv tmp_path_for(path), path
     true
-  rescue StandardError
+  rescue StandardError => ex
     # Delete (likely incomplete) temporary files on error.
+    warn "#{ex.class}: #{ex.message} - attempting to remove #{tmp_path_for(path)}."
     File.delete(tmp_path_for(path))
   end
 
