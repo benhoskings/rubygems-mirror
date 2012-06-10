@@ -38,7 +38,7 @@ class Gem::Mirror::Fetcher
     when 403, 404
       warn "#{resp.code} on #{File.basename(path)}"
     else
-      raise Error, "unexpected response #{resp.inspect}"
+      warn "Unexpected response on #{File.basename(path)}: #{resp.inspect}"
     end
     # TODO rescue http errors and reraise cleanly
   end
